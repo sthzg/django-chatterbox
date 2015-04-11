@@ -1,0 +1,5 @@
+include README.md
+recursive-include partnerdesk/locale *
+recursive-include partnerdesk/management *
+recursive-include partnerdesk/static *
+recursive-include partnerdesk/templates *
