@@ -14,7 +14,7 @@ class Command(BaseCommand):
             dest='dryrun',
             action='store_true',
             default=True,
-            help='If True only lists them messages to be processed'),
+            help='If True only lists the messages to be processed'),
     )
 
     can_import_settings = True

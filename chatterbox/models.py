@@ -98,7 +98,7 @@ class Message(models.Model):
     )
 
     #: A datetime that indicates the earliest allowed time to process the
-    #: message. Note that due to queueing there is not guarantee that a
+    #: message. Note that due to queueing there is no guarantee that a
     #: message will be processed exactly at that time.
     scheduled_for = models.DateTimeField(
         _('scheduled for'),

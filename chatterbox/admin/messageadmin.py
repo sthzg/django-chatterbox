@@ -5,7 +5,6 @@ from chatterbox.models import Message
 
 
 class MessageAdmin(admin.ModelAdmin):
-
     list_display = (
         'scheduled_for',
         'originator',
