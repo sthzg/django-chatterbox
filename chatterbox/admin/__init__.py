@@ -3,5 +3,5 @@ from __future__ import absolute_import, unicode_literals
 from .messageadmin import MessageAdmin
 
 __all__ = [
-    MessageAdmin
+    'MessageAdmin'
 ]
