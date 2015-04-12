@@ -1,7 +1,13 @@
-**Work in early development**
+**Work in early development (unusable right now)**
 
 ``django-chatterbox`` is like that one person you know that no matter what 
 you're telling them will notify each and everyone about it. Well, kind of.
+
+
+### Todos (except development)
+
+* Find a new package name since ``django-chatterbox`` is already taken.
+* Write about similarities and differences to [django-notifications](https://github.com/django-notifications/django-notifications) 
 
 
 ### Django and Python support
