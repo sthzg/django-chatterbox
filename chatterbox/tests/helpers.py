@@ -10,3 +10,24 @@ class MailEventDummyClass(ChatterboxMailEvent):
     mail_to = 'bar@example.com'
     template_subject = 'chatterbox_tests/email_subject.html'
     template_body = 'chatterbox_tests/email_body.html'
+    token_fields = (
+        ''
+    )
+
+
+class TestClass(object):
+    foo = 'ham'
+    bar = {
+        'eggs': True,
+        'juice': False
+    }
+
+
+def get_test_dict():
+    return {
+        'foo': 'ham',
+        'bar': {
+            'eggs': True,
+            'juice': False
+        }
+    }

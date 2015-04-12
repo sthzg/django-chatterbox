@@ -6,6 +6,7 @@ from django.template import loader
 from django.template.context import Context
 from django.utils.datetime_safe import datetime
 from .models import Message
+from .utils import digattr
 
 
 class BaseChatterboxEvent(object):
@@ -18,27 +19,30 @@ class BaseChatterboxEvent(object):
     originator = None
     event = None
     actor = None
+    obj = None
     target = None
     channel = None
     channel_data = dict()
     templates = OrderedDict()
     priority = 10
     extra = dict()
-    tokens = None
+    token_fields = list()
 
     # TODO(sthzg) validate given attributes on __init__ time.
 
     def __init__(self, *args, **kwargs):
         self._content = dict()
+        self._tokens = dict()
 
-    def notify_chatterbox(self, actor=None, target=None, **kwargs):
+    def notify_chatterbox(self, actor=None, obj=None, target=None, **kwargs):
         """ Persists current event on the ``Message`` model.
 
         The optional arguments ``actor`` and ``target`` will be automatically
         passed to the templates that render the content.
 
-        :param actor:
-        :param target:
+        :param actor: who issues the event
+        :param obj: the object issued with the event, e.g. an inquiry
+        :param target: the target (if any) that the actor acted upon
         :param kwargs:
         """
         # TODO(sthzg) validate given attributes on notify_chatterbox time.
@@ -92,13 +96,65 @@ class BaseChatterboxEvent(object):
         """
         t = loader.get_template(template)
         c = Context({
+            'tokens': self.build_tokens(),
             'actor': self.actor,
             'event': self.event,
+            'obj': self.obj,
             'target': self.target,
             'extra': self.extra
         })
 
         return t.render(c)
+
+    def build_tokens(self):
+        """ Checks fields at ``token_fields`` and adds their values to ``_tokens``.
+        """
+        tokens = dict()
+
+        cond1 = self.token_fields
+        cond2 = isinstance(self.token_fields, list)
+        cond3 = isinstance(self.token_fields, tuple)
+
+        if not cond1 or not (cond2 or cond3):
+            return tokens
+
+        for token_name in self.token_fields:
+            token_value = digattr(self, token_name)
+            self.add_token(token_name, token_value)
+
+    def add_token(self, keys, value, lookup_dict=None):
+        """Sets ``value`` in ``self._tokens``.
+
+        Ex:
+
+            self.add_token('foo', 'hello world')
+            self.get_token('foo')
+            # hello world
+
+            self.add_token('one.two.three', 'bingo')
+            self.get_token('one.two.three')
+            # bingo
+
+            self.add_token('one.two.three', 'bingo')
+            self.get_token('one.two')
+            # {'three': 'bingo'}
+
+        :param keys:
+        :param value:
+        :param lookup_dict:
+        :return:
+        """
+        # TODO(sthzg) Adding a nested structure to leaf crashes the method.
+        if lookup_dict is None:
+            lookup_dict = self._tokens
+
+        if "." in keys:
+            key, rest = keys.split(".", 1)
+            if key not in lookup_dict:
+                lookup_dict[key] = {}
+            self.add_token(rest, value, lookup_dict[key])
+        else:
+            lookup_dict[keys] = value
 
     def _save_message(self):
         """ Saves the event on the ``Message`` model.
@@ -124,6 +180,7 @@ class BaseChatterboxEvent(object):
         :return: due date of the message
         :rtype: datetime
         """
+        # TODO(sthzg) support USE_TZ = True for datetime based fields.
         return datetime.now()
 
 
@@ -163,7 +220,7 @@ class ChatterboxMailEvent(ChatterboxEvent):
             ch.mail_from = current_user.email
             ch.notify_chatterbox(
                 actor=current_user,
-                target=kwargs.get('instance')
+                obj=kwargs.get('instance')
             )
 
         post_save.connect(inquiry_saved, sender=YourInquiryModel)
@@ -190,10 +247,10 @@ class ChatterboxMailEvent(ChatterboxEvent):
 
         super(ChatterboxMailEvent, self).__init__(*args, **kwargs)
 
-    def notify_chatterbox(self, actor=None, target=None, **kwargs):
+    def notify_chatterbox(self, actor=None, obj=None, target=None, **kwargs):
         # TODO(sthzg) validate given attributes on notify_chatterbox time.
         self.add_channel_data('from', self.mail_from)
         self.add_channel_data('to', self.mail_to)
 
         super(ChatterboxMailEvent, self).notify_chatterbox(
-            actor, target, **kwargs)
+            actor, obj, target, **kwargs)
