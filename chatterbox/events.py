@@ -37,8 +37,8 @@ class BaseChatterboxEvent(object):
     def notify_chatterbox(self, actor=None, obj=None, target=None, **kwargs):
         """ Persists current event on the ``Message`` model.
 
-        The optional arguments ``actor`` and ``target`` will be automatically
-        passed to the templates that render the content.
+        Variables defined in ``token_fields`` will be automatically passed
+        to the templates that render the content.
 
         :param actor: who issues the event
         :param obj: the object issued with the event, e.g. an inquiry
@@ -47,6 +47,7 @@ class BaseChatterboxEvent(object):
         """
         # TODO(sthzg) validate given attributes on notify_chatterbox time.
         self.actor = actor or dict()
+        self.obj = obj or dict()
         self.target = target or dict()
         self.extra.update(kwargs.get('extra', dict()))
         self._content = self.build_content()
@@ -97,30 +98,28 @@ class BaseChatterboxEvent(object):
         t = loader.get_template(template)
         c = Context({
             'tokens': self.build_tokens(),
-            'actor': self.actor,
             'event': self.event,
-            'obj': self.obj,
-            'target': self.target,
             'extra': self.extra
         })
+        import ipdb; ipdb.set_trace()
 
         return t.render(c)
 
     def build_tokens(self):
         """ Checks fields at ``token_fields`` and adds their values to ``_tokens``.
         """
-        tokens = dict()
-
         cond1 = self.token_fields
         cond2 = isinstance(self.token_fields, list)
         cond3 = isinstance(self.token_fields, tuple)
 
         if not cond1 or not (cond2 or cond3):
-            return tokens
+            return self._tokens
 
         for token_name in self.token_fields:
             token_value = digattr(self, token_name)
             self.add_token(token_name, token_value)
+
+        return self._tokens
 
     def add_token(self, keys, value, lookup_dict=None):
         """Sets ``value`` in ``self._tokens``.
@@ -204,6 +203,14 @@ class ChatterboxMailEvent(ChatterboxEvent):
             mail_to = 'me@example.com'
             template_subject = 'my_app/chatterbox/email_subject.html'
             template_body = 'my_app/chatterbox/email_body.html'
+            # These values will be available in your template context,
+            # e.g. as {{ tokens.actor.username }}.
+            token_fields = (
+                'actor.username',
+                'actor.first_name',
+                'obj',
+                'target'
+            )
 
 
     Now you can use this event when the inquiry is sent, e.g.:
