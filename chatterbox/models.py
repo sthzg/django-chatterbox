@@ -57,6 +57,24 @@ class Message(models.Model):
         default=None
     )
 
+    #: A JSON-serialized dictionary containing arbitrary information that
+    #: you want to save with a record. Use this field to save information
+    #: from your actor, object or target. E.g., if any of these objects are
+    #: model instances you could save their primary key and model class. This
+    #: way you could fetch the instance if necessary.
+    #:
+    #:  .. note:
+    #:
+    #:     The ``Message`` model does not contain generic foreign keys to
+    #:     actor, object or target, since there are many use cases where
+    #:     these components could be different entities but model instances.
+    #:
+    metadata = models.TextField(
+        _('meta data'),
+        default=None,
+        null=True
+    )
+
     #: A JSON-serialized dictionary containing all necessary content to
     #: generate the message. If a message is intended to be mailed, this
     #: might have a ``subject`` and a ``body`` field.
