@@ -144,6 +144,38 @@ class Message(models.Model):
         null=True,
     )
 
+    #: Flag indicating whether the last attempt to process this message
+    #: yielded an error.
+    has_error = models.NullBooleanField(
+        _('has error'),
+        default=None
+    )
+
+    #: A counter that increases each time that processing this message yielded
+    #: an error. This can be used to configure the amount of retries before
+    #: a message should be treated as ``has_failed``.
+    error_count = models.PositiveIntegerField(
+        _('error count'),
+        default=None,
+        null=True
+    )
+
+    #: A JSON-serialized list of error messages. The length of the list should
+    #: match ``error_count``, so that the errors can be mapped correctly.
+    error_data = models.TextField(
+        _('error data'),
+        default=None,
+        null=True
+    )
+
+    #: A flag indicating that processing this message has been marked as
+    #: constantly failing. E.g. if an email couldn't be delivered in three
+    #: attempts the message might be marked to ``has_failed``.
+    has_failed = models.BooleanField(
+        _('has failed'),
+        default=False
+    )
+
     created = models.DateTimeField(
         _('created'),
         auto_now_add=True
