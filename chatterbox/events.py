@@ -24,6 +24,7 @@ class BaseChatterboxEvent(object):
     channel = None
     channel_data = dict()
     templates = OrderedDict()
+    languages = list()
     priority = 10
     extra = dict()
     token_fields = list()
@@ -82,8 +83,20 @@ class BaseChatterboxEvent(object):
         """
         content = OrderedDict()
 
-        for key in self.templates:
-            content[key] = self.render(self.templates.get(key))
+        ##
+        # The solution used to resolve different languages is a bit poor.
+        # It is not fault tolerant, does some magic and doesn't feature
+        # handling defaults or language fallbacks.
+        ##
+
+        for lang in self.languages:
+            content[lang] = OrderedDict()
+
+            for key in self.templates:
+                t_fragments = self.templates.get(key).split('/')
+                t_fragments.insert(len(t_fragments) - 1, lang)
+                template = '/'.join(t_fragments)
+                content[lang][key] = self.render(template)
 
         return content
 
@@ -101,7 +114,6 @@ class BaseChatterboxEvent(object):
             'event': self.event,
             'extra': self.extra
         })
-        import ipdb; ipdb.set_trace()
 
         return t.render(c)
 
