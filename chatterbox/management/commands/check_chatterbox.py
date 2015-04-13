@@ -37,9 +37,6 @@ class Command(BaseCommand):
                 handler = EmailChannelMessageHandler(message)
                 handler.process()
 
-        print mail.outbox
-        import ipdb; ipdb.set_trace()
-
         self.stdout.write('All done, sir!')
         exit(0)
 

@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 import json
 from django.core.mail import send_mail
+from django.utils.datetime_safe import datetime
 
 
 class EmailChannelMessageHandler(object):
@@ -19,4 +20,9 @@ class EmailChannelMessageHandler(object):
         subject = content.get('subject')
         body = content.get('body')
 
+        # TODO(sthzg) Proof of concept, make it fault tolerant
+        # TODO(sthzg) Add logging
         send_mail(subject, body, mail_from, [mail_to])
+        msg.is_done = True
+        msg.done_at = datetime.now()
+        msg.save()
