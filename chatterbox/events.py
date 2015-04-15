@@ -18,20 +18,23 @@ class BaseChatterboxEvent(object):
     """
     originator = None
     event = None
-    actor = None
-    obj = None
-    target = None
     channel = None
-    channel_data = dict()
     templates = OrderedDict()
     languages = list()
     priority = 10
-    extra = dict()
-    token_fields = list()
+    token_fields =  list()
+    # TODO(sthzg) Support metadata_fields
+    # metadata_fields = None  # list
 
     # TODO(sthzg) validate given attributes on __init__ time.
 
     def __init__(self, *args, **kwargs):
+        self.actor = None
+        self.obj = None
+        self.target = None
+        self.channel_data = dict()
+        self.extra = dict()
+
         self._content = dict()
         self._tokens = dict()
 
