@@ -24,3 +24,13 @@ def digattr(obj, attr, default=None):
         if callable(obj) and not getattr(obj, 'do_not_call_in_templates', False):
             obj = obj()
     return obj
+
+
+def get_language_prefixes():
+    from django.conf import settings
+    prefixes = list()
+
+    if hasattr(settings, 'LANGUAGES'):
+        prefixes = [lang for lang, name in settings.LANGUAGES]
+
+    return prefixes
