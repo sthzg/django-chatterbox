@@ -105,6 +105,15 @@ class Message(models.Model):
         default=None
     )
 
+    #: Identifier for the natural language that the generated message is in.
+    #: Will be the language code in 99% of the time. For messages that contain
+    #: mixed languages you can also choose an arbitrary id, e.g. 'mixed`.
+    language = models.CharField(
+        _('language'),
+        max_length=7,  # e.g. zh-hans
+        default=''
+    )
+
     #: The priority to process this message. In the context of queuing
     #: multiple messages at once this makes it possible to prioritize
     #: more important messages, e.g. a particular notification over the

@@ -54,8 +54,11 @@ class BaseChatterboxEvent(object):
         self.obj = obj or dict()
         self.target = target or dict()
         self.extra.update(kwargs.get('extra', dict()))
-        self._content = self.build_content()
-        self._save_message()
+        self.languages = kwargs.get('languages', self.languages)
+
+        for lang in self.languages:
+            self._content = self.build_content(lang)
+            self._save_message(lang)
 
     def add_template(self, key, template_path):
         """ Adds a template to be collected when generating the event message.
@@ -78,7 +81,7 @@ class BaseChatterboxEvent(object):
         """
         self.channel_data[key] = value
 
-    def build_content(self):
+    def build_content(self, lang=''):
         """ Returns a dictionary of the output from all configured templates.
 
         :return: dict of collected output as key => value
@@ -86,20 +89,11 @@ class BaseChatterboxEvent(object):
         """
         content = OrderedDict()
 
-        ##
-        # The solution used to resolve different languages is a bit poor.
-        # It is not fault tolerant, does some magic and doesn't feature
-        # handling defaults or language fallbacks.
-        ##
-
-        for lang in self.languages:
-            content[lang] = OrderedDict()
-
-            for key in self.templates:
-                t_fragments = self.templates.get(key).split('/')
-                t_fragments.insert(len(t_fragments) - 1, lang)
-                template = '/'.join(t_fragments)
-                content[lang][key] = self.render(template)
+        for key in self.templates:
+            t_fragments = self.templates.get(key).split('/')
+            t_fragments.insert(len(t_fragments) - 1, lang)
+            template = '/'.join(t_fragments)
+            content[key] = self.render(template)
 
         return content
 
@@ -170,7 +164,7 @@ class BaseChatterboxEvent(object):
         else:
             lookup_dict[keys] = value
 
-    def _save_message(self):
+    def _save_message(self, lang=''):
         """ Saves the event on the ``Message`` model.
         """
         # TODO(sthzg) exception handling
@@ -180,6 +174,7 @@ class BaseChatterboxEvent(object):
         message.content = json.dumps(self._content)
         message.channel = self.channel
         message.channel_data = json.dumps(self.channel_data)
+        message.language = lang
         message.priority = self.priority
         message.scheduled_for = self.get_schedule()
         message.save()
