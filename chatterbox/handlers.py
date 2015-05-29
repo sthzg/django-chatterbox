@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 import json
+import logging
 from django.core.mail import send_mail
 from django.utils.datetime_safe import datetime
+
+logger = logging.getLogger('chatterbox')
 
 
 class EmailChannelMessageHandler(object):
@@ -19,6 +22,18 @@ class EmailChannelMessageHandler(object):
         mail_to = channel_data.get('to')
         subject = content.get('subject')
         body = content.get('body')
+
+        if not mail_from or not mail_to or not subject:
+            logger.error(
+                'Message with pk {} can not be processed, since either '
+                'mail_from: {}, mail_to: {} or subject: {} are empty'.format(
+                    msg.pk,
+                    mail_from,
+                    mail_to,
+                    subject
+                )
+            )
+            return
 
         # TODO(sthzg) Proof of concept, make it fault tolerant
         # TODO(sthzg) Add logging
