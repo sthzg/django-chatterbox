@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 from __future__ import unicode_literals
-from django.core import mail
+from datetime import datetime
 from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from chatterbox.handlers import EmailChannelMessageHandler
@@ -21,7 +21,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(
-            'Checking backend for messages to be processed:'
+            '{}\tChecking backend for messages to be '
+            'processed:'.format(datetime.now())
         )
 
         due = Message.objects.due()
@@ -37,6 +38,5 @@ class Command(BaseCommand):
                 handler = EmailChannelMessageHandler(message)
                 handler.process()
 
-        self.stdout.write('All done, sir!')
+        self.stdout.write('{}\tAll done, sir!'.format(datetime.now()))
         exit(0)
-
