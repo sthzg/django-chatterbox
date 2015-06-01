@@ -66,4 +66,5 @@ wiki
 
 django/private/partnerdesk
 
-django
+
+django/djangoapp/db.sqlite3

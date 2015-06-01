@@ -1,0 +1,13 @@
+EN -- This is the email body.
+
+It has various lines.
+
+{% if foo -%}
+If: And we test the output now with conditions.
+{% else -%}
+If not: And we test the output now with conditions.
+User: {{ tokens.actor.username }}
+Title: {{ tokens.obj.title }}
+Body: {{ tokens.obj.body }}
+aprop: {{ tokens.obj.aprop }}
+{% endif -%}
