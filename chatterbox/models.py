@@ -50,6 +50,19 @@ class Message(models.Model):
         default=None
     )
 
+    #: An arbitrary string that uniquely identifies the message. It can be 
+    #: set by whoever calls `notify_chatterbox()` to allow business logic 
+    #: that determines if a certain message has already been generated. 
+    #: `natural_id` may be NULL but otherwise has to be **unique**.
+    natural_id = models.CharField(
+        _('natural id'),
+        max_length=32,
+        blank=True,
+        null=True,
+        default=None,
+        unique=True
+    )
+
     #: A string that identifies the event type, e.g. 'User liked Story'.
     event = models.CharField(
         _('event'),
