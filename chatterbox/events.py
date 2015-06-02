@@ -55,6 +55,7 @@ class BaseChatterboxEvent(object):
         self.target = target or dict()
         self.extra.update(kwargs.get('extra', dict()))
         self.languages = kwargs.get('languages', self.languages)
+        self.natural_id = kwargs.get('natural_id', None)
 
         for lang in self.languages:
             self._content = self.build_content(lang)
@@ -167,6 +168,13 @@ class BaseChatterboxEvent(object):
     def _save_message(self, lang=''):
         """ Saves the event on the ``Message`` model.
         """
+        # If a natural_id is specified, append  the language of the message
+        # so that natural_id remains unique when saving multiple languages.
+        if self.natural_id:
+            natural_id = '{}_{}'.format(self.natural_id, lang)
+        else:
+            natural_id = None
+
         # TODO(sthzg) exception handling
         message = Message()
         message.originator = self.originator
@@ -175,6 +183,7 @@ class BaseChatterboxEvent(object):
         message.channel = self.channel
         message.channel_data = json.dumps(self.channel_data)
         message.language = lang
+        message.natural_id = natural_id
         message.priority = self.priority
         message.scheduled_for = self.get_schedule()
         message.save()
