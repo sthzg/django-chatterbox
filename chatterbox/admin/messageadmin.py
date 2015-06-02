@@ -17,6 +17,8 @@ class MessageAdmin(admin.ModelAdmin):
         'created',
     )
 
+    readonly_fields = ('natural_id',)
+
     def has_add_permission(self, request):
         return False
 
